@@ -12,10 +12,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.network.adapter.DiscoverFirstAdapter
 import com.example.network.adapter.NotificationAdapter
+import com.example.network.database.AppDatabase
 import com.example.network.database.model.HeadingImageNewsModel
 import com.example.network.databinding.ActivityDiscoverBinding
 import com.example.network.fragment.TopicViewPagerFragment
 import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 private const val TAG = "DiscoverActivity_CommTag"
 
@@ -53,16 +57,22 @@ class DiscoverActivity : AppCompatActivity() {
             Log.d(TAG, msg)
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         }
+        val newsDatabase = AppDatabase.getDatabase(this)
         val list = mutableListOf<HeadingImageNewsModel>()
-        list.add(HeadingImageNewsModel("Karnataka Bandh LIVE Updates: TN to appeal SC for 5,000 cusecs of Cauvery water", "https://www.hindustantimes.com/ht-img/img/2023/09/29/550x309/PTI09-29-2023-000061B-0_1695964895465_1695964923224.jpg"))
-        list.add(HeadingImageNewsModel("Karnataka Bandh LIVE Updates: TN to appeal SC for 5,000 cusecs of Cauvery water", "https://www.hindustantimes.com/ht-img/img/2023/09/29/550x309/PTI09-29-2023-000061B-0_1695964895465_1695964923224.jpg"))
-        list.add(HeadingImageNewsModel("Karnataka Bandh LIVE Updates: TN to appeal SC for 5,000 cusecs of Cauvery water", "https://www.hindustantimes.com/ht-img/img/2023/09/29/550x309/PTI09-29-2023-000061B-0_1695964895465_1695964923224.jpg"))
-        list.add(HeadingImageNewsModel("Karnataka Bandh LIVE Updates: TN to appeal SC for 5,000 cusecs of Cauvery water", "https://www.hindustantimes.com/ht-img/img/2023/09/29/550x309/PTI09-29-2023-000061B-0_1695964895465_1695964923224.jpg"))
-        notificationAdapter.setNotificationList(list)
-        binding.notificationRV.apply {
-            adapter = notificationAdapter
-            layoutManager = LinearLayoutManager(this@DiscoverActivity)
-            addItemDecoration(divider)
+        GlobalScope.launch(Dispatchers.IO) {
+            val newsList = newsDatabase.newsDao().getAllNews()
+            for (news in newsList) {
+                val headingImageNewsModel = HeadingImageNewsModel(news.title, news.image)
+                list.add(headingImageNewsModel)
+            }
+            launch(Dispatchers.Main) {
+                notificationAdapter.setNotificationList(list)
+                binding.notificationRV.apply {
+                    adapter = notificationAdapter
+                    layoutManager = LinearLayoutManager(this@DiscoverActivity)
+                    addItemDecoration(divider)
+                }
+            }
         }
     }
     

@@ -50,7 +50,7 @@ class VerticalViewPager(context: Context, attrs: AttributeSet?) : ViewPager(cont
             }
         }
     }
-    
+
     private fun swapXYCordinates(event: MotionEvent): MotionEvent {
         //now we will swap x and y coordinates using this,...
         val width = width.toFloat()
@@ -60,13 +60,13 @@ class VerticalViewPager(context: Context, attrs: AttributeSet?) : ViewPager(cont
         event.setLocation(newX, newY)
         return event
     }
-    
+
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         val intercepted = super.onInterceptTouchEvent(swapXYCordinates(ev))
         swapXYCordinates(ev) // return touch coordinates to original reference frame for any child value..
         return intercepted
     }
-    
+
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         return super.onTouchEvent(swapXYCordinates(ev))
     }
